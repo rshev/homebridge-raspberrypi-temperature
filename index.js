@@ -1,7 +1,8 @@
-var Accessory, Service, Characteristic, UUIDGen;
-
+var Accessory, Service, Characteristic, UUIDGen, FakeGatoHistoryService;
+var inherits = require('util').inherits;
 const fs = require('fs');
 const packageFile = require("./package.json");
+var hostname = os.hostname();
 
 module.exports = function(homebridge) {
     if(!isConfig(homebridge.user.configPath(), "accessories", "RaspberryPiTemperature")) {
@@ -12,6 +13,7 @@ module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
     UUIDGen = homebridge.hap.uuid;
+    FakeGatoHistoryService = require("fakegato-history")(homebridge);
 
     homebridge.registerAccessory('homebridge-raspberrypi-temperature', 'RaspberryPiTemperature', RaspberryPiTemperature);
 }
@@ -61,6 +63,7 @@ function RaspberryPiTemperature(log, config) {
 RaspberryPiTemperature.prototype = {
     getServices: function() {
         var that = this;
+        var temp;
         
         var infoService = new Service.AccessoryInformation();
         infoService
@@ -69,11 +72,14 @@ RaspberryPiTemperature.prototype = {
             .setCharacteristic(Characteristic.SerialNumber, "Undefined")
             .setCharacteristic(Characteristic.FirmwareRevision, packageFile.version);
         
+        this.fakeGatoHistoryService = new FakeGatoHistoryService("weather", this, { storage: 'fs' });
+        
         var raspberrypiService = new Service.TemperatureSensor(that.name);
         var currentTemperatureCharacteristic = raspberrypiService.getCharacteristic(Characteristic.CurrentTemperature);
         function getCurrentTemperature() {
             var data = fs.readFileSync(that.readFile, "utf-8");
             var temperatureVal = parseFloat(data) / 1000;
+            temp = temperatureVal;
             that.log.debug("update currentTemperatureCharacteristic value: " + temperatureVal);
             return temperatureVal;
         }
@@ -81,6 +87,12 @@ RaspberryPiTemperature.prototype = {
         if(that.updateInterval) {
             setInterval(() => {
                 currentTemperatureCharacteristic.updateValue(getCurrentTemperature());
+
+                that.fakeGatoHistoryService.addEntry({
+                                time: new Date().getTime() / 1000,
+                                temp: temp
+                                });
+                
             }, that.updateInterval);
         }
         currentTemperatureCharacteristic.on('get', (callback) => {
