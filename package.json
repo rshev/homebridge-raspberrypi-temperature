@@ -8,17 +8,21 @@
     "raspberry-pi",
     "temperature"
   ],
-  "homepage": "https://github.com/YinHangCode/homebridge-raspberrypi-temperature",
+  "homepage": "https://github.com/thncode/homebridge-raspberrypi-temperature",
   "author": "YinHang",
   "repository": {
     "type": "git",
-    "url": "git://github.com/YinHangCode/homebridge-raspberrypi-temperature"
+    "url": "git://github.com/thncode/homebridge-raspberrypi-temperature"
   },
   "bugs": {
-    "url": "http://github.com/YinHangCode/homebridge-raspberrypi-temperature/issues"
+    "url": "http://github.com/thncode/homebridge-raspberrypi-temperature/issues"
   },
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.4.1"
+  },
+  "dependencies" :{
+    "fakegato-history": "^0.4.0",
+    "request": "^2.65.0"
   }
 }
