@@ -8,7 +8,7 @@ module.exports = function(homebridge) {
     if(!isConfig(homebridge.user.configPath(), "accessories", "RaspberryPiTemperature")) {
         return;
     }
-    
+
     Accessory = homebridge.platformAccessory;
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -36,7 +36,7 @@ function isConfig(configFile, type, name) {
         }
     } else {
     }
-    
+
     return false;
 }
 
@@ -57,7 +57,7 @@ function RaspberryPiTemperature(log, config) {
     } else {
         this.updateInterval = null;
     }
-  
+    this.multiplier = config["multiplier"] || 1000;
 }
 
 RaspberryPiTemperature.prototype = {
@@ -78,8 +78,9 @@ RaspberryPiTemperature.prototype = {
         var currentTemperatureCharacteristic = raspberrypiService.getCharacteristic(Characteristic.CurrentTemperature);
         function getCurrentTemperature() {
             var data = fs.readFileSync(that.readFile, "utf-8");
-            var temperatureVal = parseFloat(data) / 1000;
+            var temperatureVal = parseFloat(data) / that.multiplier;
             temp = temperatureVal;
+
             that.log.debug("update currentTemperatureCharacteristic value: " + temperatureVal);
             return temperatureVal;
         }
@@ -98,7 +99,7 @@ RaspberryPiTemperature.prototype = {
         currentTemperatureCharacteristic.on('get', (callback) => {
             callback(null, getCurrentTemperature());
         });
-        
+
         return [infoService, raspberrypiService];
     }
 }
