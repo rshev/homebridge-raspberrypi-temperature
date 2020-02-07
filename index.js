@@ -2,7 +2,6 @@ var Accessory, Service, Characteristic, UUIDGen, FakeGatoHistoryService;
 var inherits = require('util').inherits;
 const fs = require('fs');
 const packageFile = require("./package.json");
-var hostname = os.hostname();
 
 module.exports = function(homebridge) {
     if(!isConfig(homebridge.user.configPath(), "accessories", "RaspberryPiTemperature")) {
